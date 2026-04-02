@@ -1,2 +1,25 @@
-# Zone identifiers
-**/*:Zone.Identifier
+# macOS / editor
+.DS_Store
+.idea/
+.vscode/
+
+# frontend
+node_modules/
+WebUI/node_modules/
+WebUI/dist/
+
+# python
+.venv/
+__pycache__/
+.pytest_cache/
+.mypy_cache/
+*.pyc
+
+# env
+.env
+.env.*
+!.env.example
+
+# misc
+coverage/
+output/
