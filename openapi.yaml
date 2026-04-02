@@ -1,0 +1,225 @@
+openapi: 3.0.3
+info:
+  title: PAIR Full-Stack Take-home - Learner Progress Slice
+  version: 1.0.0
+servers:
+  - url: http://localhost:8000
+paths:
+  /tenants/{tenant_id}/users/{user_id}/lessons:
+    get:
+      summary: List lessons available to a learner, with progress summaries
+      parameters:
+        - name: tenant_id
+          in: path
+          required: true
+          schema: { type: integer }
+        - name: user_id
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        "200":
+          description: Lessons for the tenant and user.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LessonListResponse"
+        "404":
+          description: Tenant or user not found (or not related).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /tenants/{tenant_id}/users/{user_id}/lessons/{lesson_id}:
+    get:
+      summary: Get assembled lesson content and learner progress
+      parameters:
+        - name: tenant_id
+          in: path
+          required: true
+          schema: { type: integer }
+        - name: user_id
+          in: path
+          required: true
+          schema: { type: integer }
+        - name: lesson_id
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        "200":
+          description: Lesson with ordered blocks, selected variants, and progress.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LessonResponse"
+        "404":
+          description: Tenant, user, or lesson not found (or not related).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /tenants/{tenant_id}/users/{user_id}/lessons/{lesson_id}/progress:
+    put:
+      summary: Upsert progress for a single lesson block
+      parameters:
+        - name: tenant_id
+          in: path
+          required: true
+          schema: { type: integer }
+        - name: user_id
+          in: path
+          required: true
+          schema: { type: integer }
+        - name: lesson_id
+          in: path
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProgressUpsertRequest"
+      responses:
+        "200":
+          description: Updated progress summary for the lesson.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProgressUpsertResponse"
+        "400":
+          description: Invalid payload, or block_id is not part of the lesson.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "404":
+          description: Tenant, user, or lesson not found (or not related).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+components:
+  schemas:
+    LessonListResponse:
+      type: object
+      required: [lessons]
+      properties:
+        lessons:
+          type: array
+          items:
+            $ref: "#/components/schemas/LessonListItem"
+
+    LessonListItem:
+      type: object
+      required: [id, slug, title, status, next_block_id, progress_summary]
+      properties:
+        id: { type: integer }
+        slug: { type: string }
+        title: { type: string }
+        status:
+          type: string
+          enum: [not_started, in_progress, completed]
+        next_block_id:
+          nullable: true
+          oneOf:
+            - type: integer
+            - type: "null"
+        progress_summary:
+          $ref: "#/components/schemas/ProgressSummary"
+
+    LessonResponse:
+      type: object
+      required: [lesson, blocks, progress_summary]
+      properties:
+        lesson:
+          type: object
+          required: [id, slug, title]
+          properties:
+            id: { type: integer }
+            slug: { type: string }
+            title: { type: string }
+        blocks:
+          type: array
+          items:
+            $ref: "#/components/schemas/LessonBlock"
+        progress_summary:
+          $ref: "#/components/schemas/ProgressSummary"
+
+    LessonBlock:
+      type: object
+      required: [id, type, position, variant]
+      properties:
+        id: { type: integer }
+        type: { type: string }
+        position: { type: integer }
+        variant:
+          $ref: "#/components/schemas/Variant"
+        user_progress:
+          nullable: true
+          oneOf:
+            - type: string
+              enum: [seen, completed]
+            - type: "null"
+
+    Variant:
+      type: object
+      required: [id, tenant_id, data]
+      properties:
+        id: { type: integer }
+        tenant_id:
+          nullable: true
+          oneOf:
+            - type: integer
+            - type: "null"
+        data:
+          type: object
+          additionalProperties: true
+
+    ProgressUpsertRequest:
+      type: object
+      required: [block_id, status]
+      properties:
+        block_id: { type: integer }
+        status:
+          type: string
+          enum: [seen, completed]
+
+    ProgressUpsertResponse:
+      type: object
+      required: [stored_status, progress_summary]
+      properties:
+        stored_status:
+          type: string
+          enum: [seen, completed]
+        progress_summary:
+          $ref: "#/components/schemas/ProgressSummary"
+
+    ProgressSummary:
+      type: object
+      required: [total_blocks, seen_blocks, completed_blocks, last_seen_block_id, completed]
+      properties:
+        total_blocks: { type: integer }
+        seen_blocks: { type: integer }
+        completed_blocks: { type: integer }
+        last_seen_block_id:
+          nullable: true
+          oneOf:
+            - type: integer
+            - type: "null"
+        completed: { type: boolean }
+
+    Error:
+      type: object
+      required: [error]
+      properties:
+        error:
+          type: object
+          required: [code, message]
+          properties:
+            code: { type: string }
+            message: { type: string }
