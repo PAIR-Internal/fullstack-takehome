@@ -1,0 +1,13 @@
+{
+  "name": "pair-fullstack-takehome",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Production-inspired scaffold for the PAIR full-stack take-home",
+  "scripts": {
+    "dev:webui": "npm run --workspace WebUI dev",
+    "type-check:webui": "npm run --workspace WebUI type-check"
+  },
+  "workspaces": [
+    "WebUI"
+  ]
+}

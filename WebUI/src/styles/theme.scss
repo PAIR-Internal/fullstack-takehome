@@ -1,0 +1,53 @@
+@use "./variables.scss" as *;
+
+:root {
+  color: $theme-text;
+  background: $theme-background;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  min-width: 320px;
+}
+
+.g-page-shell {
+  min-height: 100vh;
+  padding: $spacing-xl;
+  background:
+    radial-gradient(circle at top left, rgba(79, 107, 146, 0.14), transparent 30%),
+    linear-gradient(180deg, #fbfcff 0%, $theme-background 100%);
+}
+
+.g-panel {
+  border: 1px solid $theme-border;
+  border-radius: $border-radius-xl;
+  background: rgba(255, 255, 255, 0.86);
+  backdrop-filter: blur(10px);
+}
+
+.g-kicker {
+  margin: 0 0 $spacing-sm;
+  color: $theme-accent;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.g-muted-text {
+  color: $theme-text-muted;
+}
+
+.g-inline-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: $spacing-xs;
+  padding: $spacing-xs $spacing-sm;
+  border-radius: 999px;
+  background: $theme-surface-muted;
+  color: $theme-text;
+  font-size: 0.875rem;
+}
